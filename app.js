@@ -59,9 +59,15 @@ async function sendMessage(obdCommand) {
     return;
   }
 
+  // Sicherstellen, dass der Befehl nicht leer ist
+  if (!obdCommand) {
+    console.error("Kein gültiger Befehl zum Senden.");
+    return;
+  }
+
   const encoder = new TextEncoder();
   try {
-    await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
+    await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r')); // Nachricht senden
     console.log("Nachricht gesendet:", obdCommand);
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
@@ -69,11 +75,15 @@ async function sendMessage(obdCommand) {
 }
 
 async function testCommands() {
-  await sendMessage('AT Z\r'); // Setzt den Dongle zurück
-  await sendMessage('AT I\r'); // Fordert Informationen über den Dongle an
-  await sendMessage('AT L1\r'); // Aktiviert die Rückgabe von Antworten
-  await sendMessage('0100\r'); // Fragt die unterstützten PIDs ab
-  await sendMessage('010C\r'); // Fragt die Motordrehzahl ab
+  await sendMessage('AT Z'); // Setzt den Dongle zurück
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
+  await sendMessage('AT I'); // Fordert Informationen über den Dongle an
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
+  await sendMessage('AT L1'); // Aktiviert die Rückgabe von Antworten
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
+  await sendMessage('0100'); // Fragt die unterstützten PIDs ab
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
+  await sendMessage('010C'); // Fragt die Motordrehzahl ab
 }
 
 function addMessageToChat(message, sender) {
@@ -85,4 +95,4 @@ function addMessageToChat(message, sender) {
   messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
 }
 
-// Um die Befehle zu testen, rufen Sie nach dem Verbinden die Funktion testCommands() auf
+// Nach erfolgreicher Verbindung kannst du testCommands() aufrufen, um die Befehle zu testen.
