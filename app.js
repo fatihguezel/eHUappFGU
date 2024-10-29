@@ -9,8 +9,7 @@ async function connectToDevice() {
     const options = {
       acceptAllDevices: true,
       optionalServices: [
-        '00001800-0000-1000-8000-00805f9b34fb', // Generic Access
-        '0000180a-0000-1000-8000-00805f9b34fb'  // Device Information Service
+        '0000fff0-0000-1000-8000-00805f9b34fb'  // Custom Service für OBD-Kommunikation
       ]
     };
 
@@ -21,26 +20,36 @@ async function connectToDevice() {
     server = await device.gatt.connect();
     console.log("Verbunden mit dem GATT-Server");
 
-    // Versuche, den Device Information Service zu erhalten
-    const service = await server.getPrimaryService('0000180a-0000-1000-8000-00805f9b34fb');
+    // Zugriff auf den Service `fff0`
+    const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
     
-    // Überprüfe, ob die service-Variable existiert
-    if (service) {
-      console.log("Device Information Service gefunden");
+    // Zugriff auf die Charakteristik `fff1`
+    try {
+      characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
+      console.log("Charakteristik fff1 gefunden und für Benachrichtigungen aktiviert");
 
-      // Beispielcharakteristik abrufen (z. B. "Serial Number String", falls verfügbar)
+      await characteristic.startNotifications();
+      characteristic.addEventListener('characteristicvaluechanged', handleData);
+
+      alert("Verbindung hergestellt! OBD-Nachrichten können jetzt gesendet werden.");
+      isConnected = true;
+    } catch (error) {
+      console.error("Charakteristik fff1 nicht gefunden, versuche ae3b:", error);
+
+      // Wenn `fff1` nicht gefunden wurde, versuche `ae3b`
       try {
-        characteristic = await service.getCharacteristic('2a25'); // 2A25 ist oft die UUID für die Seriennummer
-        console.log("Charakteristik gefunden: Serial Number String");
+        characteristic = await service.getCharacteristic('0000ae3b-0000-1000-8000-00805f9b34fb');
+        console.log("Charakteristik ae3b gefunden und für Benachrichtigungen aktiviert");
+
         await characteristic.startNotifications();
         characteristic.addEventListener('characteristicvaluechanged', handleData);
+
         alert("Verbindung hergestellt! OBD-Nachrichten können jetzt gesendet werden.");
         isConnected = true;
       } catch (error) {
-        console.error("Fehler beim Abrufen der Charakteristik:", error);
+        console.error("Keine passende Charakteristik gefunden:", error);
+        alert("OBD-Dongle unterstützt keine kompatible Kommunikationscharakteristik.");
       }
-    } else {
-      console.error("Device Information Service nicht gefunden.");
     }
   } catch (error) {
     console.error("Fehler:", error);
@@ -57,7 +66,20 @@ function handleData(event) {
   addMessageToChat(value, 'device');
 }
 
-// Hilfsfunktionen zum Testen und Debuggen
+// Funktion zum Senden einer Nachricht (OBD-Befehl)
+async function sendOBDMessage(obdCommand) {
+  if (!isConnected) {
+    alert("Bitte zuerst eine Verbindung herstellen.");
+    return;
+  }
+
+  addMessageToChat(obdCommand, 'user');
+
+  const encoder = new TextEncoder();
+  await characteristic.writeValue(encoder.encode(obdCommand + '\r'));
+}
+
+// Funktion zur Anzeige von Nachrichten im Chat
 function addMessageToChat(message, sender) {
   const messages = document.getElementById('messages');
   const messageElem = document.createElement('div');
