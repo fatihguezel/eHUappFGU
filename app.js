@@ -49,8 +49,11 @@ async function connectToDevice() {
 
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
-  console.log("Empfangene Daten:", value); // Protokolliere die empfangenen Daten
-  addMessageToChat(value, 'device'); // Empfangene Daten im Chat anzeigen
+  console.log("Empfangene Daten:", value);
+  
+  // Füge zusätzliche Verarbeitung hinzu, falls erforderlich
+  const cleanedValue = value.trim(); // Entfernt Leerzeichen am Anfang und Ende
+  addMessageToChat(cleanedValue, 'device'); // Zeige die empfangenen Daten im Chat an
 }
 
 async function sendMessage() {
@@ -72,8 +75,8 @@ async function sendMessage() {
   const encoder = new TextEncoder();
   try {
     await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
-    console.log("Nachricht gesendet:", obdCommand); // Protokolliere die gesendete Nachricht
-    
+    console.log("Nachricht gesendet:", obdCommand);
+
     // Verzögerung für den nächsten Befehl
     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
   } catch (error) {
