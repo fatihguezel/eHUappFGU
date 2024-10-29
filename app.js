@@ -17,10 +17,8 @@ async function connectToDevice() {
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
 
     const characteristicsToTest = [
-      '0000fff1-0000-1000-8000-00805f9b34fb',
-      '0000fff2-0000-1000-8000-00805f9b34fb',
-      '0000ae01-0000-1000-8000-00805f9b34fb',
-      '0000ae02-0000-1000-8000-00805f9b34fb'
+      '0000fff1-0000-1000-8000-00805f9b34fb', // Mögliche Benachrichtigungs-Charakteristik
+      '0000fff2-0000-1000-8000-00805f9b34fb'  // Weitere mögliche Charakteristik für Benachrichtigungen
     ];
 
     for (const charUUID of characteristicsToTest) {
@@ -39,7 +37,7 @@ async function connectToDevice() {
     }
 
     if (!isConnected) {
-      alert("Keine geeignete Charakteristik gefunden.");
+      alert("Keine geeignete Charakteristik für Benachrichtigungen gefunden.");
     }
   } catch (error) {
     console.error("Verbindungsfehler:", error);
@@ -50,7 +48,7 @@ async function connectToDevice() {
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
   console.log("Empfangene Daten:", value);
-  addMessageToChat(value, 'device'); // Empfangene Daten im Chat anzeigen
+  addMessageToChat(value, 'device');
 }
 
 async function sendMessage(obdCommand) {
@@ -59,7 +57,6 @@ async function sendMessage(obdCommand) {
     return;
   }
 
-  // Sicherstellen, dass der Befehl nicht leer ist
   if (!obdCommand) {
     console.error("Kein gültiger Befehl zum Senden.");
     return;
@@ -67,8 +64,8 @@ async function sendMessage(obdCommand) {
 
   const encoder = new TextEncoder();
   try {
-    await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r')); // Nachricht senden
-    console.log("Nachricht gesendet:", obdCommand); // Protokolliere die gesendete Nachricht
+    await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
+    console.log("Nachricht gesendet:", obdCommand);
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
@@ -78,7 +75,7 @@ function addMessageToChat(message, sender) {
   const messages = document.getElementById('messages');
   const messageElem = document.createElement('div');
   messageElem.className = `message ${sender}`;
-  messageElem.textContent = message; // Text wird unformatiert hinzugefügt
+  messageElem.textContent = message;
   messages.appendChild(messageElem);
-  messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
+  messages.scrollTop = messages.scrollHeight;
 }
