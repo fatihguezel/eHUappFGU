@@ -2,7 +2,6 @@ let device;
 let server;
 let characteristic;
 let isConnected = false;
-let testerPresentInterval;
 
 async function connectToDevice() {
   try {
@@ -32,7 +31,6 @@ async function connectToDevice() {
 
         console.log(`Charakteristik ${charUUID} gefunden und Benachrichtigungen aktiviert`);
         isConnected = true;
-        startTesterPresent();
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
         break; // Erfolgreiche Charakteristik gefunden
       } catch (error) {
@@ -75,37 +73,11 @@ async function sendMessage() {
   try {
     await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
     console.log("Nachricht gesendet:", obdCommand);
-    
+
     // Verzögerung für den nächsten Befehl
     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
-  }
-}
-
-function startTesterPresent() {
-  if (isConnected) {
-    testerPresentInterval = setInterval(async () => {
-      await characteristic.stopNotifications(); // Stoppe Benachrichtigungen
-      await sendTesterPresent(); // Sende Tester Present
-      await characteristic.startNotifications(); // Starte Benachrichtigungen wieder
-    }, 5000);
-  }
-}
-
-async function sendTesterPresent() {
-  try {
-    await sendMessage('3E'); // Tester Present
-    console.log("Tester Present gesendet");
-  } catch (error) {
-    console.error("Fehler beim Senden von Tester Present:", error);
-  }
-}
-
-function stopTesterPresent() {
-  if (testerPresentInterval) {
-    clearInterval(testerPresentInterval);
-    testerPresentInterval = null;
   }
 }
 
