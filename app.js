@@ -17,7 +17,6 @@ async function connectToDevice() {
     server = await device.gatt.connect();
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
 
-    // Charakteristiken `FFF1` für Benachrichtigungen und `FFF2` zum Schreiben
     characteristicNotify = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
     await characteristicNotify.startNotifications();
     characteristicNotify.addEventListener('characteristicvaluechanged', handleData);
@@ -68,3 +67,12 @@ function addMessageToChat(message, sender) {
   messages.appendChild(messageElem);
   messages.scrollTop = messages.scrollHeight;
 }
+
+// Event-Listener für die Enter-Taste im Eingabefeld
+document.getElementById('inputMessage').addEventListener('keypress', function (event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    sendMessage(this.value); // Sende den Text im Eingabefeld
+    this.value = ''; // Leert das Eingabefeld nach dem Senden
+  }
+});
