@@ -16,8 +16,7 @@ async function connectToDevice() {
 
     server = await device.gatt.connect();
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
-    
-    // Liste möglicher Charakteristiken
+
     const characteristicsToTest = [
       '0000fff1-0000-1000-8000-00805f9b34fb',
       '0000fff2-0000-1000-8000-00805f9b34fb',
@@ -35,7 +34,7 @@ async function connectToDevice() {
         isConnected = true;
         startTesterPresent();
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        break; // Erfolgreiche Charakteristik gefunden, Schleife beenden
+        break; // Erfolgreiche Charakteristik gefunden
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
       }
@@ -50,28 +49,36 @@ async function connectToDevice() {
   }
 }
 
-// Empfangen von Daten
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
   console.log("Empfangene Daten:", value);
 }
 
-// Nachricht senden (OBD-Befehl)
-async function sendMessage(message) {
-  if (isConnected) {
-    const encoder = new TextEncoder();
-    try {
-      await characteristic.writeValueWithoutResponse(encoder.encode(message + '\r'));
-      console.log("Nachricht gesendet:", message);
-    } catch (error) {
-      console.error("Senden der Nachricht fehlgeschlagen:", error);
-    }
-  } else {
+async function sendMessage() {
+  if (!isConnected) {
     alert("Bitte zuerst eine Verbindung herstellen.");
+    return;
+  }
+
+  const input = document.getElementById('inputMessage');
+  const obdCommand = input.value.trim(); // Leerzeichen entfernen
+  if (!obdCommand) {
+    alert("Bitte eine Nachricht eingeben."); // Fehlermeldung
+    return;
+  }
+  input.value = ''; // Eingabefeld zurücksetzen
+
+  addMessageToChat(obdCommand, 'user');
+
+  const encoder = new TextEncoder();
+  try {
+    await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
+    console.log("Nachricht gesendet:", obdCommand);
+  } catch (error) {
+    console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
 }
 
-// "Tester Present"-Nachricht, um Verbindung aufrechtzuerhalten
 function startTesterPresent() {
   if (isConnected) {
     testerPresentInterval = setInterval(() => {
@@ -81,7 +88,6 @@ function startTesterPresent() {
   }
 }
 
-// Intervall bei Verbindungsabbruch stoppen
 function stopTesterPresent() {
   if (testerPresentInterval) {
     clearInterval(testerPresentInterval);
