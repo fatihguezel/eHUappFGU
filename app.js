@@ -32,7 +32,6 @@ async function connectToDevice() {
         console.log(`Charakteristik ${charUUID} gefunden und Benachrichtigungen aktiviert`);
         isConnected = true;
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        await testCommands(); // Rufe die Funktion auf, um die Befehle zu testen
         break; // Erfolgreiche Charakteristik gefunden
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
@@ -73,18 +72,6 @@ async function sendMessage(obdCommand) {
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
-}
-
-async function testCommands() {
-  await sendMessage('AT Z'); // Setzt den Dongle zurück
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
-  await sendMessage('AT I'); // Fordert Informationen über den Dongle an
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
-  await sendMessage('AT L1'); // Aktiviert die Rückgabe von Antworten
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
-  await sendMessage('0100'); // Fragt die unterstützten PIDs ab
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Warte auf die Antwort
-  await sendMessage('010C'); // Fragt die Motordrehzahl ab
 }
 
 function addMessageToChat(message, sender) {
