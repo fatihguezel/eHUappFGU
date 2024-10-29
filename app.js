@@ -17,7 +17,7 @@ async function connectToDevice() {
     server = await device.gatt.connect();
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
     
-    // Liste der möglichen Charakteristiken
+    // Liste möglicher Charakteristiken
     const characteristicsToTest = [
       '0000fff1-0000-1000-8000-00805f9b34fb',
       '0000fff2-0000-1000-8000-00805f9b34fb',
@@ -35,7 +35,7 @@ async function connectToDevice() {
         isConnected = true;
         startTesterPresent();
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        break; // Verlasse die Schleife, sobald eine passende Charakteristik gefunden wurde
+        break; // Erfolgreiche Charakteristik gefunden, Schleife beenden
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
       }
@@ -50,11 +50,13 @@ async function connectToDevice() {
   }
 }
 
+// Empfangen von Daten
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
   console.log("Empfangene Daten:", value);
 }
 
+// Nachricht senden (OBD-Befehl)
 async function sendMessage(message) {
   if (isConnected) {
     const encoder = new TextEncoder();
@@ -69,6 +71,7 @@ async function sendMessage(message) {
   }
 }
 
+// "Tester Present"-Nachricht, um Verbindung aufrechtzuerhalten
 function startTesterPresent() {
   if (isConnected) {
     testerPresentInterval = setInterval(() => {
@@ -78,6 +81,7 @@ function startTesterPresent() {
   }
 }
 
+// Intervall bei Verbindungsabbruch stoppen
 function stopTesterPresent() {
   if (testerPresentInterval) {
     clearInterval(testerPresentInterval);
