@@ -28,6 +28,7 @@ async function connectToDevice() {
   }
 }
 
+// Funktion zur Datenverarbeitung
 function handleData(event) {
   if (!isConnected) return;
   const value = new TextDecoder().decode(event.target.value);
@@ -35,6 +36,7 @@ function handleData(event) {
   addMessageToChat(value, 'device');
 }
 
+// Funktion zum Senden einer Nachricht
 async function sendMessage() {
   if (!isConnected) {
     alert("Bitte zuerst eine Verbindung herstellen.");
@@ -51,6 +53,7 @@ async function sendMessage() {
   await characteristic.writeValue(encoder.encode(message + '\r'));
 }
 
+// Funktion zur Anzeige von Nachrichten im Chat
 function addMessageToChat(message, sender) {
   const messages = document.getElementById('messages');
   const messageElem = document.createElement('div');
