@@ -38,13 +38,11 @@ h1 {
 .message.user {
   background-color: #007bff;
   color: #fff;
-  align-self: flex-end;
 }
 
 .message.device {
   background-color: #f1f1f1;
   color: #333;
-  align-self: flex-start;
 }
 
 input, button {
