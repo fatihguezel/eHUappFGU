@@ -1,6 +1,7 @@
 let device;
 let server;
-let characteristic;
+let characteristicNotify;
+let characteristicWrite;
 let isConnected = false;
 
 async function connectToDevice() {
@@ -16,28 +17,16 @@ async function connectToDevice() {
     server = await device.gatt.connect();
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
 
-    const characteristicsToTest = [
-      '0000fff1-0000-1000-8000-00805f9b34fb', 
-      '0000fff2-0000-1000-8000-00805f9b34fb'  
-    ];
+    // Charakteristiken `FFF1` für Benachrichtigungen und `FFF2` zum Schreiben
+    characteristicNotify = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
+    await characteristicNotify.startNotifications();
+    characteristicNotify.addEventListener('characteristicvaluechanged', handleData);
 
-    for (const charUUID of characteristicsToTest) {
-      try {
-        characteristic = await service.getCharacteristic(charUUID);
-        await characteristic.startNotifications();
-        characteristic.addEventListener('characteristicvaluechanged', handleData);
-        console.log(`Charakteristik ${charUUID} gefunden und Benachrichtigungen aktiviert`);
-        isConnected = true;
-        alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        break;
-      } catch (error) {
-        console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
-      }
-    }
+    characteristicWrite = await service.getCharacteristic('0000fff2-0000-1000-8000-00805f9b34fb');
 
-    if (!isConnected) {
-      alert("Keine geeignete Charakteristik für Benachrichtigungen gefunden.");
-    }
+    console.log("Benachrichtigungen auf `FFF1` aktiviert und `FFF2` für das Schreiben konfiguriert.");
+    isConnected = true;
+    alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
   } catch (error) {
     console.error("Verbindungsfehler:", error);
     isConnected = false;
@@ -63,8 +52,9 @@ async function sendMessage(obdCommand) {
 
   const encoder = new TextEncoder();
   try {
-    await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
+    await characteristicWrite.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
     console.log("Nachricht gesendet:", obdCommand);
+    addMessageToChat(obdCommand, 'user');
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
