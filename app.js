@@ -75,6 +75,9 @@ async function sendMessage() {
   try {
     await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
     console.log("Nachricht gesendet:", obdCommand);
+    
+    // Verzögerung für den nächsten Befehl
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
