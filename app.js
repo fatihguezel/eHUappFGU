@@ -10,7 +10,8 @@ async function connectToDevice() {
       acceptAllDevices: true,
       optionalServices: [
         '000018f0-0000-1000-8000-00805f9b34fb', // Daten-Service UUID
-        '00001800-0000-1000-8000-00805f9b34fb'  // GATT-Profil UUID
+        '00001800-0000-1000-8000-00805f9b34fb',
+        '00001101-0000-1000-8000-00805F9B34FB'// GATT-Profil UUID
       ]
     };
 
