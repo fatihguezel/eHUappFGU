@@ -3,19 +3,27 @@ let server;
 let characteristic;
 let isConnected = false;
 
-// Funktion zur Bluetooth-Verbindung mit dem Gerät
+// Funktion zur Verbindung mit dem Bluetooth-Gerät
 async function connectToDevice() {
   try {
-    const options = { acceptAllDevices: true }; // Zeigt alle BLE-Geräte an
+    const options = {
+      acceptAllDevices: true,
+      optionalServices: [
+        '000018f0-0000-1000-8000-00805f9b34fb', // Daten-Service UUID
+        '00001800-0000-1000-8000-00805f9b34fb'  // GATT-Profil UUID
+      ]
+    };
+
     device = await navigator.bluetooth.requestDevice(options);
     console.log("Gerät gefunden:", device.name);
 
+    // GATT-Server-Verbindung herstellen
     server = await device.gatt.connect();
     console.log("Verbunden mit dem GATT-Server");
 
     // Service und Charakteristik abrufen
-    const service = await server.getPrimaryService('battery_service'); // UUID anpassen
-    characteristic = await service.getCharacteristic('battery_level'); // UUID anpassen
+    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+    characteristic = await service.getCharacteristic('battery_level'); // Passe die UUID für die Charakteristik an
 
     await characteristic.startNotifications();
     characteristic.addEventListener('characteristicvaluechanged', handleData);
@@ -28,7 +36,7 @@ async function connectToDevice() {
   }
 }
 
-// Funktion zur Datenverarbeitung
+// Funktion zur Verarbeitung empfangener Daten
 function handleData(event) {
   if (!isConnected) return;
   const value = new TextDecoder().decode(event.target.value);
