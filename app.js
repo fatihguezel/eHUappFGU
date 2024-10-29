@@ -49,7 +49,7 @@ async function connectToDevice() {
 
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
-  console.log("Empfangene Daten:", value);
+  console.log("Empfangene Daten:", value); // Protokolliere die empfangenen Daten
   addMessageToChat(value, 'device'); // Empfangene Daten im Chat anzeigen
 }
 
@@ -72,8 +72,8 @@ async function sendMessage() {
   const encoder = new TextEncoder();
   try {
     await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
-    console.log("Nachricht gesendet:", obdCommand);
-
+    console.log("Nachricht gesendet:", obdCommand); // Protokolliere die gesendete Nachricht
+    
     // Verzögerung für den nächsten Befehl
     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
   } catch (error) {
