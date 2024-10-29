@@ -67,11 +67,15 @@ function handleData(event) {
 }
 
 // Funktion zum Senden einer Nachricht (OBD-Befehl)
-async function sendOBDMessage(obdCommand) {
+async function sendMessage() { 
   if (!isConnected) {
     alert("Bitte zuerst eine Verbindung herstellen.");
     return;
   }
+
+  const input = document.getElementById('inputMessage');
+  const obdCommand = input.value;
+  input.value = '';
 
   addMessageToChat(obdCommand, 'user');
 
