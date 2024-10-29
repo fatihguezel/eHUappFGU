@@ -85,7 +85,7 @@ function addMessageToChat(message, sender) {
   const messages = document.getElementById('messages');
   const messageElem = document.createElement('div');
   messageElem.className = `message ${sender}`;
-  messageElem.textContent = message;
+  messageElem.textContent = message; // Text wird unformatiert hinzugefügt
   messages.appendChild(messageElem);
   messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
 }
