@@ -32,6 +32,7 @@ async function connectToDevice() {
         console.log(`Charakteristik ${charUUID} gefunden und Benachrichtigungen aktiviert`);
         isConnected = true;
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
+        await testCommands(); // Rufe die Funktion auf, um die Befehle zu testen
         break; // Erfolgreiche Charakteristik gefunden
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
@@ -68,7 +69,7 @@ async function sendMessage(obdCommand) {
   const encoder = new TextEncoder();
   try {
     await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r')); // Nachricht senden
-    console.log("Nachricht gesendet:", obdCommand);
+    console.log("Nachricht gesendet:", obdCommand); // Protokolliere die gesendete Nachricht
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
@@ -94,5 +95,3 @@ function addMessageToChat(message, sender) {
   messages.appendChild(messageElem);
   messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
 }
-
-// Nach erfolgreicher Verbindung kannst du testCommands() aufrufen, um die Befehle zu testen.
