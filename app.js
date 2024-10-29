@@ -34,7 +34,7 @@ async function connectToDevice() {
         isConnected = true;
         startTesterPresent();
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        break;
+        break; // Erfolgreiche Charakteristik gefunden
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
       }
@@ -80,21 +80,20 @@ async function sendMessage() {
   }
 }
 
-function addMessageToChat(message, sender) {
-  const messages = document.getElementById('messages');
-  const messageElem = document.createElement('div');
-  messageElem.className = `message ${sender}`;
-  messageElem.textContent = message;
-  messages.appendChild(messageElem);
-  messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
-}
-
 function startTesterPresent() {
   if (isConnected) {
     testerPresentInterval = setInterval(() => {
-      sendMessage('3E'); // Tester Present
-      console.log("Tester Present gesendet");
+      sendTesterPresent(); // separate Funktion zum Senden
     }, 5000);
+  }
+}
+
+async function sendTesterPresent() {
+  try {
+    await sendMessage('3E'); // Tester Present
+    console.log("Tester Present gesendet");
+  } catch (error) {
+    console.error("Fehler beim Senden von Tester Present:", error);
   }
 }
 
@@ -103,4 +102,13 @@ function stopTesterPresent() {
     clearInterval(testerPresentInterval);
     testerPresentInterval = null;
   }
+}
+
+function addMessageToChat(message, sender) {
+  const messages = document.getElementById('messages');
+  const messageElem = document.createElement('div');
+  messageElem.className = `message ${sender}`;
+  messageElem.textContent = message;
+  messages.appendChild(messageElem);
+  messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
 }
