@@ -17,8 +17,8 @@ async function connectToDevice() {
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
 
     const characteristicsToTest = [
-      '0000fff1-0000-1000-8000-00805f9b34fb', // Mögliche Benachrichtigungs-Charakteristik
-      '0000fff2-0000-1000-8000-00805f9b34fb'  // Weitere mögliche Charakteristik für Benachrichtigungen
+      '0000fff1-0000-1000-8000-00805f9b34fb', 
+      '0000fff2-0000-1000-8000-00805f9b34fb'  
     ];
 
     for (const charUUID of characteristicsToTest) {
@@ -26,11 +26,10 @@ async function connectToDevice() {
         characteristic = await service.getCharacteristic(charUUID);
         await characteristic.startNotifications();
         characteristic.addEventListener('characteristicvaluechanged', handleData);
-
         console.log(`Charakteristik ${charUUID} gefunden und Benachrichtigungen aktiviert`);
         isConnected = true;
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        break; // Erfolgreiche Charakteristik gefunden
+        break;
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
       }
