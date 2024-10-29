@@ -14,7 +14,7 @@
       <div id="messages"></div>
     </div>
     <input type="text" id="inputMessage" placeholder="Nachricht eingeben..." />
-    <button onclick="sendMessage()">Senden</button>
+   <button onclick="sendMessage(document.getElementById('inputMessage').value)">Senden</button>
   </div>
   <script src="app.js"></script>
 </body>
