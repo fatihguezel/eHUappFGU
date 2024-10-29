@@ -50,38 +50,30 @@ async function connectToDevice() {
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
   console.log("Empfangene Daten:", value);
-  
-  // Füge zusätzliche Verarbeitung hinzu, falls erforderlich
-  const cleanedValue = value.trim(); // Entfernt Leerzeichen am Anfang und Ende
-  addMessageToChat(cleanedValue, 'device'); // Zeige die empfangenen Daten im Chat an
+  addMessageToChat(value, 'device'); // Empfangene Daten im Chat anzeigen
 }
 
-async function sendMessage() {
+async function sendMessage(obdCommand) {
   if (!isConnected) {
     alert("Bitte zuerst eine Verbindung herstellen.");
     return;
   }
 
-  const input = document.getElementById('inputMessage');
-  const obdCommand = input.value.trim(); // Leerzeichen entfernen
-  if (!obdCommand) {
-    alert("Bitte eine Nachricht eingeben."); // Fehlermeldung
-    return;
-  }
-  input.value = ''; // Eingabefeld zurücksetzen
-
-  addMessageToChat(obdCommand, 'user');
-
   const encoder = new TextEncoder();
   try {
     await characteristic.writeValueWithoutResponse(encoder.encode(obdCommand + '\r'));
     console.log("Nachricht gesendet:", obdCommand);
-
-    // Verzögerung für den nächsten Befehl
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 Sekunde warten
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
+}
+
+async function testCommands() {
+  await sendMessage('AT Z\r'); // Setzt den Dongle zurück
+  await sendMessage('AT I\r'); // Fordert Informationen über den Dongle an
+  await sendMessage('AT L1\r'); // Aktiviert die Rückgabe von Antworten
+  await sendMessage('0100\r'); // Fragt die unterstützten PIDs ab
+  await sendMessage('010C\r'); // Fragt die Motordrehzahl ab
 }
 
 function addMessageToChat(message, sender) {
@@ -92,3 +84,5 @@ function addMessageToChat(message, sender) {
   messages.appendChild(messageElem);
   messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
 }
+
+// Um die Befehle zu testen, rufen Sie nach dem Verbinden die Funktion testCommands() auf
