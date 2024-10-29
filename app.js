@@ -4,7 +4,6 @@ let characteristic;
 let isConnected = false;
 let testerPresentInterval;
 
-// Verbindung herstellen
 async function connectToDevice() {
   try {
     const options = {
@@ -17,54 +16,71 @@ async function connectToDevice() {
 
     server = await device.gatt.connect();
     const service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
+    
+    // Liste der möglichen Charakteristiken
+    const characteristicsToTest = [
+      '0000fff1-0000-1000-8000-00805f9b34fb',
+      '0000fff2-0000-1000-8000-00805f9b34fb',
+      '0000ae01-0000-1000-8000-00805f9b34fb',
+      '0000ae02-0000-1000-8000-00805f9b34fb'
+    ];
 
-    // Zugriff auf FFF1-Charakteristik
-    characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
-    await characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', handleData);
+    for (const charUUID of characteristicsToTest) {
+      try {
+        characteristic = await service.getCharacteristic(charUUID);
+        await characteristic.startNotifications();
+        characteristic.addEventListener('characteristicvaluechanged', handleData);
 
-    alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-    isConnected = true;
+        console.log(`Charakteristik ${charUUID} gefunden und Benachrichtigungen aktiviert`);
+        isConnected = true;
+        startTesterPresent();
+        alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
+        break; // Verlasse die Schleife, sobald eine passende Charakteristik gefunden wurde
+      } catch (error) {
+        console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
+      }
+    }
 
-    // Beginne "Tester Present"-Nachrichten zu senden
-    startTesterPresent();
+    if (!isConnected) {
+      alert("Keine geeignete Charakteristik gefunden.");
+    }
   } catch (error) {
     console.error("Verbindungsfehler:", error);
     isConnected = false;
   }
 }
 
-// Funktion zum Senden der "Tester Present"-Nachricht
-function startTesterPresent() {
+function handleData(event) {
+  const value = new TextDecoder().decode(event.target.value);
+  console.log("Empfangene Daten:", value);
+}
+
+async function sendMessage(message) {
   if (isConnected) {
-    testerPresentInterval = setInterval(() => {
-      sendMessage('3E');  // 3E ist der OBD-II-Befehl für "Tester Present"
-      console.log("Tester Present gesendet");
-    }, 5000);  // alle 5 Sekunden
+    const encoder = new TextEncoder();
+    try {
+      await characteristic.writeValueWithoutResponse(encoder.encode(message + '\r'));
+      console.log("Nachricht gesendet:", message);
+    } catch (error) {
+      console.error("Senden der Nachricht fehlgeschlagen:", error);
+    }
+  } else {
+    alert("Bitte zuerst eine Verbindung herstellen.");
   }
 }
 
-// Funktion zum Stoppen der "Tester Present"-Nachrichten
+function startTesterPresent() {
+  if (isConnected) {
+    testerPresentInterval = setInterval(() => {
+      sendMessage('3E'); // Tester Present
+      console.log("Tester Present gesendet");
+    }, 5000);
+  }
+}
+
 function stopTesterPresent() {
   if (testerPresentInterval) {
     clearInterval(testerPresentInterval);
     testerPresentInterval = null;
   }
 }
-
-// Funktion zur Verarbeitung empfangener Daten
-function handleData(event) {
-  const value = new TextDecoder().decode(event.target.value);
-  console.log("Empfangene Daten:", value);
-}
-
-// Senden von Daten
-async function sendMessage(message) {
-  if (isConnected) {
-    const encoder = new TextEncoder();
-    await characteristic.writeValue(encoder.encode(message + '\r'));
-  }
-}
-
-// Bei Verbindungsende sicherstellen, dass das Intervall beendet wird
-device.addEventListener('gattserverdisconnected', stopTesterPresent);
