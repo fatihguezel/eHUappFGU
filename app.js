@@ -9,9 +9,10 @@ async function connectToDevice() {
     const options = {
       acceptAllDevices: true,
       optionalServices: [
-        '000018f0-0000-1000-8000-00805f9b34fb', // Daten-Service UUID
-        '00001800-0000-1000-8000-00805f9b34fb',
-        '00001101-0000-1000-8000-00805F9B34FB'// GATT-Profil UUID
+        '000018f0-0000-1000-8000-00805f9b34fb', // Custom Data Service für OBD-Kommunikation
+        '00001800-0000-1000-8000-00805f9b34fb', // Generic Access
+        '0000180a-0000-1000-8000-00805f9b34fb', // Device Information Service
+        '0000ffe0-0000-1000-8000-00805f9b34fb'  // UART Service für BLE-Dongle
       ]
     };
 
@@ -23,12 +24,12 @@ async function connectToDevice() {
     console.log("Verbunden mit dem GATT-Server");
 
     // Service und Charakteristik abrufen
-    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-    characteristic = await service.getCharacteristic('battery_level'); // Passe die UUID für die Charakteristik an
+    const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+    characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'); // Häufig verwendete Charakteristik für OBD-Daten
 
     await characteristic.startNotifications();
     characteristic.addEventListener('characteristicvaluechanged', handleData);
-    alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
+    alert("Verbindung hergestellt! OBD-Nachrichten können jetzt gesendet werden.");
     isConnected = true;
   } catch (error) {
     console.error("Fehler:", error);
@@ -45,21 +46,17 @@ function handleData(event) {
   addMessageToChat(value, 'device');
 }
 
-// Funktion zum Senden einer Nachricht
-async function sendMessage() {
+// Funktion zum Senden einer OBD-Nachricht
+async function sendOBDMessage(obdCommand) {
   if (!isConnected) {
     alert("Bitte zuerst eine Verbindung herstellen.");
     return;
   }
 
-  const input = document.getElementById('inputMessage');
-  const message = input.value;
-  input.value = '';
-
-  addMessageToChat(message, 'user');
+  addMessageToChat(obdCommand, 'user');
 
   const encoder = new TextEncoder();
-  await characteristic.writeValue(encoder.encode(message + '\r'));
+  await characteristic.writeValue(encoder.encode(obdCommand + '\r'));
 }
 
 // Funktion zur Anzeige von Nachrichten im Chat
@@ -70,4 +67,9 @@ function addMessageToChat(message, sender) {
   messageElem.textContent = message;
   messages.appendChild(messageElem);
   messages.scrollTop = messages.scrollHeight;
+}
+
+// Beispiel für eine OBD-Anfrage: "010C" entspricht der Motor-Last in OBD
+async function requestEngineRPM() {
+  await sendOBDMessage("010C");
 }
