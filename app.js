@@ -31,7 +31,7 @@ async function connectToDevice() {
       await characteristic.startNotifications();
       characteristic.addEventListener('characteristicvaluechanged', handleData);
 
-      alert("Verbindung hergestellt! OBD-Nachrichten können jetzt gesendet werden.");
+      alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
       isConnected = true;
     } catch (error) {
       console.error("Charakteristik fff1 nicht gefunden, versuche ae3b:", error);
@@ -44,7 +44,7 @@ async function connectToDevice() {
         await characteristic.startNotifications();
         characteristic.addEventListener('characteristicvaluechanged', handleData);
 
-        alert("Verbindung hergestellt! OBD-Nachrichten können jetzt gesendet werden.");
+        alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
         isConnected = true;
       } catch (error) {
         console.error("Keine passende Charakteristik gefunden:", error);
