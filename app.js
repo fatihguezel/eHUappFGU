@@ -34,7 +34,7 @@ async function connectToDevice() {
         isConnected = true;
         startTesterPresent();
         alert("Verbindung hergestellt! Nachrichten können jetzt gesendet werden.");
-        break; // Erfolgreiche Charakteristik gefunden
+        break;
       } catch (error) {
         console.warn(`Charakteristik ${charUUID} nicht geeignet:`, error);
       }
@@ -52,6 +52,7 @@ async function connectToDevice() {
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
   console.log("Empfangene Daten:", value);
+  addMessageToChat(value, 'device'); // Empfangene Daten im Chat anzeigen
 }
 
 async function sendMessage() {
@@ -77,6 +78,15 @@ async function sendMessage() {
   } catch (error) {
     console.error("Senden der Nachricht fehlgeschlagen:", error);
   }
+}
+
+function addMessageToChat(message, sender) {
+  const messages = document.getElementById('messages');
+  const messageElem = document.createElement('div');
+  messageElem.className = `message ${sender}`;
+  messageElem.textContent = message;
+  messages.appendChild(messageElem);
+  messages.scrollTop = messages.scrollHeight; // Scrollen zum neuesten Beitrag
 }
 
 function startTesterPresent() {
