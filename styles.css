@@ -1,3 +1,4 @@
+/* Grundlegende Stildefinitionen für die gesamte Seite */
 body {
   font-family: Arial, sans-serif;
   display: flex;
@@ -8,6 +9,7 @@ body {
   background-color: #f9f9f9;
 }
 
+/* Container für den Chat-Bereich mit weißem Hintergrund und Schatten */
 .container {
   width: 600px;
   background: #fff;
@@ -16,36 +18,43 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Stil für die Überschrift des Chats */
 h1 {
   text-align: center;
   color: #007bff;
 }
 
+/* Chat-Bereich mit blauer Umrandung und automatischem Scrollen */
 #chat {
-  border: 1px solid #ccc;
+  border: 2px solid #007bff; /* Blaue Umrandung für den Chat-Bereich */
   padding: 10px;
-  height: 300px;
+  height: 600px;
   overflow-y: auto;
   margin-bottom: 10px;
 }
 
+/* Allgemeine Nachrichteneinstellungen */
 .message {
   padding: 5px 10px;
   border-radius: 15px;
   margin-bottom: 5px;
 }
 
+/* Stil für Benutzer-Nachrichten */
 .message.user {
   background-color: #007bff;
   color: #fff;
 }
 
+/* Stil für Geräte-Nachrichten */
 .message.device {
   background-color: #f1f1f1;
   color: #333;
 }
 
-input, button {
+/* Eingabefeld und Button mit einheitlicher Breite und Stil */
+input,
+button {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
